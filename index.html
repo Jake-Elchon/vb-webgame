@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Snake</title>
+
+  <!-- Inter for UI text · Space Grotesk for display headings -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       START SCREEN
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <div id="start-screen" class="start-screen" role="dialog" aria-modal="true" aria-label="Snake – start screen">
+
+    <!-- Ambient background orbs (pure CSS, no images) -->
+    <div class="ss-orb ss-orb-1" aria-hidden="true"></div>
+    <div class="ss-orb ss-orb-2" aria-hidden="true"></div>
+
+    <div class="ss-inner">
+
+      <!-- ── Hero ─────────────────────────────────────────────────────────── -->
+      <header class="ss-hero">
+        <div class="ss-logo" aria-hidden="true">
+          <div class="ss-logo-snake">
+            <span class="logo-seg logo-head"></span>
+            <span class="logo-seg"></span>
+            <span class="logo-seg"></span>
+            <span class="logo-seg"></span>
+            <span class="logo-seg logo-tail"></span>
+          </div>
+        </div>
+        <h1 class="ss-title">Snake</h1>
+        <p class="ss-tagline">Eat. Grow. Survive.</p>
+      </header>
+
+      <!-- ── How to play ───────────────────────────────────────────────────── -->
+      <section class="ss-card" aria-label="How to play">
+        <h2 class="ss-card-eyebrow">How to play</h2>
+        <ul class="ss-steps">
+          <li class="ss-step">
+            <span class="ss-step-pip" style="--pip:#4ade80">🎯</span>
+            <div class="ss-step-body">
+              <strong>Eat the food</strong>
+              <span>Every red dot makes you longer and adds to your score.</span>
+            </div>
+          </li>
+          <li class="ss-step">
+            <span class="ss-step-pip" style="--pip:#60a5fa">⌨️</span>
+            <div class="ss-step-body">
+              <strong>Steer</strong>
+              <span>Arrow keys or <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> — no reversing allowed.</span>
+            </div>
+          </li>
+          <li class="ss-step">
+            <span class="ss-step-pip" style="--pip:#f87171">💀</span>
+            <div class="ss-step-body">
+              <strong>Don't crash</strong>
+              <span>Hit a wall or your own tail and it's game over.</span>
+            </div>
+          </li>
+          <li class="ss-step">
+            <span class="ss-step-pip" style="--pip:#a78bfa">⚡</span>
+            <div class="ss-step-body">
+              <strong>Speed increases</strong>
+              <span>Every few points the snake accelerates — stay sharp!</span>
+            </div>
+          </li>
+          <li class="ss-step">
+            <span class="ss-step-pip" style="--pip:#94a3b8">⏸</span>
+            <div class="ss-step-body">
+              <strong>Pause anytime</strong>
+              <span>Press <kbd>P</kbd> or <kbd>Esc</kbd> to freeze the action.</span>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <!-- ── Difficulty ────────────────────────────────────────────────────── -->
+      <section class="ss-card ss-diff-section" aria-label="Choose difficulty">
+        <h2 class="ss-card-eyebrow">Difficulty</h2>
+        <div class="diff-pills" id="ss-diff-pills" role="group" aria-label="Difficulty level">
+          <button class="diff-pill diff-pill-easy active" data-diff="easy"   aria-pressed="true">Easy</button>
+          <button class="diff-pill diff-pill-medium"      data-diff="medium" aria-pressed="false">Medium</button>
+          <button class="diff-pill diff-pill-hard"        data-diff="hard"   aria-pressed="false">Hard</button>
+        </div>
+        <p class="diff-desc" id="ss-diff-desc">Walls wrap · slower start · gentle acceleration</p>
+      </section>
+
+      <!-- ── CTA ───────────────────────────────────────────────────────────── -->
+      <button id="ss-start-btn" class="ss-start-btn" aria-label="Start the game">
+        <svg class="ss-play-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+          <path d="M3 2.5l10 5.5-10 5.5V2.5z"/>
+        </svg>
+        Start Game
+      </button>
+
+      <p class="ss-footer">Best scores are saved per difficulty · works offline</p>
+
+    </div>
+  </div><!-- /start-screen -->
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       GAME UI
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <div class="game-shell" id="game-ui" aria-label="Game area">
+
+    <!-- Top bar -->
+    <header class="game-header">
+      <div class="game-wordmark" aria-label="Snake">
+        <span class="wordmark-icon" aria-hidden="true">
+          <!-- tiny inline snake SVG -->
+          <svg width="22" height="14" viewBox="0 0 22 14" fill="none">
+            <rect x="0"  y="4" width="6" height="6" rx="2" fill="var(--snake-color,#4ade80)"/>
+            <rect x="8"  y="4" width="6" height="6" rx="2" fill="var(--snake-color,#22c55e)" opacity=".85"/>
+            <rect x="16" y="4" width="6" height="6" rx="2" fill="var(--snake-color,#16a34a)" opacity=".65"/>
+          </svg>
+        </span>
+        <span class="wordmark-text">Snake</span>
+      </div>
+
+      <div class="scoreboard">
+        <div class="score-box">
+          <span class="score-label">Score</span>
+          <span class="score-value" id="score">0</span>
+        </div>
+        <div class="score-divider" aria-hidden="true"></div>
+        <div class="score-box score-box-best">
+          <span class="score-label">
+            Best &thinsp;
+            <span id="difficulty-badge" class="diff-badge diff-easy">Easy</span>
+          </span>
+          <span class="score-value score-best" id="high-score">0</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Canvas -->
+    <div class="canvas-wrapper" id="canvas-wrapper">
+      <canvas id="game-canvas" width="400" height="400"></canvas>
+
+      <!-- Game-over / pause overlay (starts hidden) -->
+      <div class="overlay hidden" id="overlay" role="dialog" aria-modal="true">
+        <div class="overlay-panel">
+          <div class="overlay-icon" id="overlay-icon" aria-hidden="true">💀</div>
+          <h2 class="overlay-title" id="overlay-title">Game Over</h2>
+          <p class="overlay-score" id="overlay-message">Score: 0</p>
+          <p class="overlay-record" id="overlay-sub"></p>
+
+          <div class="diff-selector" id="diff-selector">
+            <span class="diff-selector-label">Play again as</span>
+            <div class="diff-pills" id="ov-diff-pills" role="group" aria-label="Difficulty level">
+              <button class="diff-pill diff-pill-easy active" data-diff="easy"   aria-pressed="true">Easy</button>
+              <button class="diff-pill diff-pill-medium"      data-diff="medium" aria-pressed="false">Medium</button>
+              <button class="diff-pill diff-pill-hard"        data-diff="hard"   aria-pressed="false">Hard</button>
+            </div>
+            <p class="diff-desc" id="diff-desc">Walls wrap · slower start · gentle acceleration</p>
+          </div>
+
+          <button id="start-btn" class="play-again-btn">Play Again</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer controls hint + D-pad -->
+    <div class="game-footer">
+      <p class="controls-hint">
+        <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd>
+        <span class="hint-or">or</span>
+        <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
+        &nbsp;·&nbsp;
+        <kbd>P</kbd> pause
+      </p>
+
+      <div class="dpad" aria-label="Mobile controls">
+        <button class="dpad-btn" id="btn-up"    aria-label="Move up">▲</button>
+        <div class="dpad-row">
+          <button class="dpad-btn" id="btn-left"  aria-label="Move left">◀</button>
+          <button class="dpad-btn dpad-center" id="btn-pause" aria-label="Pause">⏸</button>
+          <button class="dpad-btn" id="btn-right" aria-label="Move right">▶</button>
+        </div>
+        <button class="dpad-btn" id="btn-down"  aria-label="Move down">▼</button>
+      </div>
+    </div>
+
+  </div><!-- /game-ui -->
+
+  <script src="game.js"></script>
+</body>
+</html>
